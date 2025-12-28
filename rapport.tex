@@ -1,0 +1,243 @@
+\documentclass[a4paper, 12pt]{report}
+
+% --- PACKAGES ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{xcolor}
+\usepackage{titlesec}
+
+% --- CONFIGURATION ---
+\geometry{hmargin=2.5cm, vmargin=2.5cm}
+\setlength{\parskip}{1em}
+\setcounter{tocdepth}{2}
+
+% Commande pour les instructions aux étudiants (à supprimer à la fin)
+\newcommand{\instruction}[2]{\textbf{\textcolor{blue}{[#1 : #2]}}}
+\newcommand{\todo}[1]{\textit{\textcolor{red}{(TODO: #1)}}}
+
+% --- METADONNÉES ---
+\title{\textbf{Analyse de Données Avancée}\\
+\Large Airbnb à New York : Économie de partage ou para-hôtellerie ?}
+\author{
+    \textbf{Groupe de Projet M1} \\[0.5cm]
+    Marc-Antony TCHICOU \\
+    Kelvin WONG \\
+    Mouhamed CISSE \\
+    Alexis SCHNEIDER \\
+    Mohammed-Yahya DAMI
+}
+\date{ENSIIE -- Année 2024-2025}
+
+\begin{document}
+
+% --- PAGE DE TITRE ---
+\maketitle
+
+% --- TABLE DES MATIÈRES ---
+\tableofcontents
+\newpage
+
+% --- INTRODUCTION GÉNÉRALE ---
+\chapter*{Introduction Générale}
+\addcontentsline{toc}{chapter}{Introduction Générale}
+
+Depuis son lancement en 2008, Airbnb a bouleversé l'industrie touristique. Si la promesse initiale était le partage de logement entre particuliers ("Live like a local"), la plateforme est aujourd'hui accusée de favoriser une professionnalisation accrue, transformant des logements résidentiels en offres para-hôtelières.
+
+Ce projet s'appuie sur le dataset \textit{New York City Airbnb Open Data (2019)}, contenant environ 49 000 observations. 
+
+\textbf{Problématique :} Dans quelle mesure le marché Airbnb new-yorkais reflète-t-il encore une économie de partage, et comment l'activité des hôtes se structure-t-elle géographiquement et économiquement ?
+
+Pour répondre à cette question, nous avons divisé l'analyse en cinq axes majeurs, traités successivement dans ce rapport.
+
+\newpage
+
+% ====================================================================
+% PARTIE 1 : PRÉPARATION DES DONNÉES
+% Étudiant responsable : [Nom Étudiant 1]
+% ====================================================================
+\chapter{Préparation et Nettoyage des Données}
+\textit{Responsable : Étudiant 1}
+
+\section{Audit du Dataset Initial}
+\instruction{Étudiant 1}{Décrire le jeu de données brut.}
+Le dataset contient 16 variables. Nous avons observé les problèmes suivants :
+\begin{itemize}
+    \item \textbf{Valeurs manquantes :} \todo{Indiquer quelles colonnes avaient des NULL (ex: reviews\_per\_month) et comment elles ont été traitées.}
+    \item \textbf{Types de données :} \todo{Correction des dates ou des catégories.}
+\end{itemize}
+
+\section{Traitement des Outliers et Transformations}
+\instruction{Étudiant 1}{Expliquer le nettoyage des prix et la création de variables.}
+
+Pour garantir la robustesse des analyses statistiques, nous avons procédé aux nettoyages suivants :
+\begin{enumerate}
+    \item \textbf{Prix :} Suppression des prix à 0\$ et des valeurs extrêmes. Transformation logarithmique (\texttt{log\_price}) effectuée pour normaliser la distribution.
+    \item \textbf{Création de la variable \texttt{host\_type} :} 
+    Nous avons segmenté les hôtes en trois catégories basées sur le nombre de listings (\texttt{calculated\_host\_listings\_count}) :
+    \begin{itemize}
+        \item \textbf{Occasionnel :} 1 annonce.
+        \item \textbf{Multi-propriétaire :} 2 à 5 annonces.
+        \item \textbf{Professionnel :} > 5 annonces.
+    \end{itemize}
+\end{enumerate}
+
+\section{Aperçu du Dataset Propre}
+\todo{Insérer ici un tableau résumant les statistiques descriptives après nettoyage (mean, std, min, max pour les variables numériques).}
+
+\newpage
+
+% ====================================================================
+% PARTIE 2 : ANALYSE DESCRIPTIVE
+% Étudiant responsable : [Nom Étudiant 2]
+% ====================================================================
+\chapter{Analyse Descriptive et Tests Statistiques}
+\textit{Responsable : Étudiant 2}
+
+\section{Distribution des Prix}
+\instruction{Étudiant 2}{Analyser les histogrammes et boxplots.}
+
+La distribution globale des prix montre une forte asymétrie à gauche (skewness positive).
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.8\textwidth]{images/distrib_prix.png}
+    \caption{Distribution globale des prix (avec transformation Log)}
+    \todo{Insérer le graphique de densité des prix.}
+\end{figure}
+
+L'analyse par \textit{Borough} (arrondissement) révèle une hiérarchie claire : Manhattan est significativement plus cher que les autres arrondissements, suivi de Brooklyn.
+
+\section{Analyse par Type de Logement et d'Hôte}
+\instruction{Étudiant 2}{Commenter les parts de marché.}
+
+D'après nos graphiques :
+\begin{itemize}
+    \item \textbf{Types de chambres :} Le "Entire home/apt" domine le marché en volume et en prix.
+    \item \textbf{Parts de marché des hôtes :} Les hôtes occasionnels représentent 66\% des annonces, mais les professionnels captent une part disproportionnée du revenu potentiel via une disponibilité plus élevée.
+\end{itemize}
+
+\section{Tests Statistiques (Kruskal-Wallis)}
+\instruction{Étudiant 2}{Interpréter les résultats des tests du document source.}
+
+Nous avons effectué un test de Kruskal-Wallis pour vérifier si les différences de prix entre les types d'hôtes sont significatives.
+\begin{itemize}
+    \item $H_0$ : Les distributions de prix sont identiques entre les groupes.
+    \item \textbf{Résultat :} p-value < 0.05.
+    \item \textbf{Conclusion :} \todo{Expliquer que le type d'hôte influe significativement sur le prix et la disponibilité.}
+\end{itemize}
+
+\newpage
+
+% ====================================================================
+% PARTIE 3 : ANALYSE FACTORIELLE (ACP)
+% Étudiant responsable : [Nom Étudiant 3]
+% ====================================================================
+\chapter{Réduction de Dimension (ACP)}
+\textit{Responsable : Étudiant 3}
+
+\section{Choix des Variables et Pertinence}
+\instruction{Étudiant 3}{Justifier le choix des variables actives.}
+
+Nous avons réalisé une Analyse en Composantes Principales (ACP) sur les variables quantitatives suivantes : \texttt{price}, \texttt{minimum\_nights}, \texttt{availability\_365}, \texttt{number\_of\_reviews}, \texttt{calculated\_host\_listings\_count}.
+
+\section{Interprétation des Axes}
+\instruction{Étudiant 3}{Analyser le cercle des corrélations.}
+
+L'analyse du cercle des corrélations (voir Figure ci-dessous) permet d'identifier deux axes latents :
+\begin{itemize}
+    \item \textbf{Axe 1 (Horizontal - ~28\% variance) :} Cet axe semble représenter l'\textbf{intensité commerciale}. Il est fortement corrélé avec \texttt{availability\_365} et le nombre de listings. Il oppose les logements toujours disponibles (style hôtel) aux logements peu disponibles (vrai partage).
+    \item \textbf{Axe 2 (Vertical - ~23\% variance) :} Cet axe représente les \textbf{caractéristiques du séjour}. Il oppose le prix et le nombre de nuits minimum au nombre de commentaires.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.6\textwidth]{images/acp_cercle.png}
+    \caption{Cercle des corrélations}
+    \todo{Insérer le cercle des corrélations ici.}
+\end{figure}
+
+\section{Projection des Individus}
+La projection des individus montre une forme de "V", suggérant deux régimes de fonctionnement distincts sur la plateforme.
+
+\newpage
+
+% ====================================================================
+% PARTIE 4 : CLUSTERING (SEGMENTATION)
+% Étudiant responsable : [Nom Étudiant 4]
+% ====================================================================
+\chapter{Segmentation des Hôtes (Clustering)}
+\textit{Responsable : Étudiant 4}
+
+\section{Méthodologie K-Means}
+Nous avons appliqué l'algorithme K-Means sur les composantes principales. La méthode du coude ("Elbow Method") a suggéré un découpage optimal en 4 classes.
+
+\section{Caractérisation des 4 Clusters}
+\instruction{Étudiant 4}{Décrire les clusters à partir des statistiques moyennes (voir slide 15/16 du PDF).}
+
+L'analyse des centroïdes nous permet de nommer les classes :
+\begin{description}
+    \item[Cluster 0 - "L'offre Standard"] : Prix modérés, disponibilité moyenne. C'est le cœur du marché.
+    \item[Cluster 1 - "L'offre Business"] : Disponibilité très élevée (285 jours/an), prix élevés (257\$), géré par des hôtes ayant plusieurs biens. Ce cluster s'apparente à de l'hôtellerie déguisée.
+    \item[Cluster 2 - "Le Partage Authentique"] : Faible disponibilité (25 jours/an), prix bas, séjours courts. Correspond à la philosophie initiale d'Airbnb.
+    \item[Cluster 3 - "L'offre Luxe / Long Séjour"] : Prix élevés, nuits minimums importantes.
+\end{description}
+
+\section{Croisement avec les Variables Catégorielles}
+\todo{Insérer un graphique "stacked bar" montrant la répartition des types d'hôtes (Pro/Occasionnel) au sein de chaque cluster.}
+
+\newpage
+
+% ====================================================================
+% PARTIE 5 : ANALYSE SPATIALE ET MODÉLISATION
+% Étudiant responsable : [Nom Étudiant 5]
+% ====================================================================
+\chapter{Analyse Spatiale et Modélisation Économétrique}
+\textit{Responsable : Étudiant 5}
+
+\section{Clustering Spatial (DBSCAN)}
+\instruction{Étudiant 5}{Expliquer l'approche par densité.}
+
+Contrairement au découpage administratif par arrondissements, l'algorithme DBSCAN (basé sur la densité géographique) a révélé la véritable structure touristique de la ville.
+\begin{itemize}
+    \item Un \textbf{Super-Cluster} central connectant le sud de Manhattan et le nord de Brooklyn.
+    \item Une périphérie diffuse où l'activité est sporadique.
+\end{itemize}
+\todo{Insérer la carte obtenue via DBSCAN.}
+
+\section{Dualité Géographique : Business vs Partage}
+L'analyse cartographique montre une ségrégation nette :
+\begin{itemize}
+    \item Les \textbf{zones "Business"} (forte présence de multi-propriétaires) sont concentrées sur Midtown et le Financial District.
+    \item Les \textbf{zones "Partage"} sont repoussées vers les quartiers résidentiels comme Harlem ou Bedford-Stuyvesant.
+\end{itemize}
+
+\section{Modèle Explicatif du Prix (Régression OLS)}
+\instruction{Étudiant 5}{Interpréter les coefficients de la régression (slide 22).}
+
+Nous avons modélisé le \texttt{log\_price} ($R^2 \approx 0.50$). Les résultats montrent que :
+\begin{enumerate}
+    \item \textbf{L'impact géographique est prédominant :} Toutes choses égales par ailleurs, un logement à Manhattan coûte 55\% plus cher que dans le Bronx.
+    \item \textbf{La prime à l'intimité :} Une chambre privée coûte environ 53\% moins cher qu'un logement entier (coef -0.75).
+    \item \textbf{Le paradoxe professionnel :} Étonnamment, les professionnels pratiquent des prix légèrement inférieurs (-6\%) aux occasionnels à bien équivalent, misant probablement sur le volume et le taux d'occupation.
+\end{enumerate}
+
+\newpage
+
+% --- CONCLUSION GÉNÉRALE ---
+\chapter*{Conclusion et Perspectives}
+\addcontentsline{toc}{chapter}{Conclusion}
+
+Au terme de cette analyse, nous pouvons affirmer que la plateforme Airbnb à New York en 2019 présente une structure duale. 
+
+D'un côté, une majorité d'hôtes (66\%) pratique encore un partage occasionnel conforme à l'esprit "Sharing Economy". De l'autre, une minorité d'acteurs professionnels (10\% des hôtes) a industrialisé l'activité, générant une offre quasi-hôtelière concentrée sur Manhattan, caractérisée par une disponibilité permanente et une gestion multi-sites.
+
+L'analyse spatiale et le clustering confirment que ces deux mondes cohabitent mais ne se mélangent pas géographiquement : le "business" occupe le centre touristique, le "partage" occupe la périphérie résidentielle.
+
+\end{document}
