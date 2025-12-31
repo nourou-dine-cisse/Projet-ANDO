@@ -29,7 +29,8 @@
 }
 
 % --- METADONNÉES ---
-\title{\textbf{Analyse de Données Avancée}\\
+\title{ 
+\textbf{Analyse de Données Avancée}\\
 \Large Airbnb à New York : Économie de partage ou para-hôtellerie ?}
 \author{
     Marc-Antony TCHICOU \\
@@ -65,8 +66,8 @@ Depuis sa création en 2008, Airbnb a radicalement transformé l'industrie du to
 Cependant, dans des métropoles mondiales comme New York, ce modèle a évolué. La rentabilité élevée de la location courte durée a attiré des investisseurs et des opérateurs professionnels, soulevant une question fondamentale sur la nature actuelle de la plateforme.
 
 \subsection{Problématique et Enjeux}
-Airbnb est-il toujours un outil de complément de revenu pour les résidents, ou est-il devenu une place de marché pour une industrie para-hôtelière dérégulée ?
-Cette étude cherche à quantifier cette transformation en répondant à la problématique suivante : \textbf{Comment l'activité des hôtes se structure-t-elle géographiquement et économiquement, et quels sont les facteurs déterminants de la performance sur ce marché hybride ?}
+Alors qu'Airbnb se définit par l'économie de partage, la réalité new-yorkaise semble opposer une périphérie résidentielle à un centre hyper-professionnalisé. Cette dualité soulève la problématique suivante :
+Dans quelle mesure la structuration géographique et économique de l'activité des hôtes révèle-t-elle une rupture entre le modèle originel de la plateforme et une logique de para-hôtellerie industrielle ?}
 
 \subsection{Jeu de Données et Démarche Méthodologique}
 L'analyse s'appuie sur le dataset \textit{New York City Airbnb Open Data (2019)}, comportant environ 49 000 annonces. Pour traiter ce volume et extraire des tendances lourdes, nous avons adopté une démarche en quatre temps :
@@ -87,14 +88,27 @@ La première phase du projet est fondamentale pour la robustesse des analyses ul
 \subsection{Protocole de Nettoyage et Feature Engineering}
 Le dataset initial comportait du bruit statistique qu'il a fallu traiter pour éviter des biais dans les modèles de Machine Learning.
 \begin{itemize}
-    \item \textbf{Traitement des valeurs aberrantes :} Une suppression des prix nuls (0\$) a été effectuée. De plus, la distribution des prix étant fortement asymétrique (étalée vers la droite avec des biens de luxe extrêmes), une transformation logarithmique (\texttt{log\_price}) a été appliquée pour normaliser la variable.
-    \item \textbf{Segmentation Métier des Hôtes :} Une simple distinction binaire étant insuffisante, nous avons créé la variable \texttt{host\_type} basée sur le volume d'annonces (\texttt{calculated\_host\_listings\_count}) et la disponibilité (\texttt{availability\_365}). Trois segments ont été définis :
+    \item \textbf{Gestion des données manquantes} :  
+    La variable \texttt{reviews\_per\_month}, essentielle pour mesurer l'activité, présentait des valeurs nulles pour les nouveaux logements. Une imputation par la valeur 0 a été réalisée (\texttt{fillna(0)}), considérant qu'une absence de donnée équivaut à une absence d'activité historique. De plus, les noms d'hôtes manquants ont été étiquetés \texttt{"Unknown"}.
+
+    \item \textbf{Suppression du bruit et des colonnes inutiles} :  
+    Les identifiants uniques et données textuelles non structurées (\texttt{id}, \texttt{name}, \texttt{last\_review}) ont été retirés.
+
+    \item \textbf{Traitement des valeurs aberrantes (Outliers)} :  
+    Une méthode d'écrêtage statistique a été appliquée. Les prix nuls ont été supprimés et les valeurs supérieures au 99\textsuperscript{ème} percentile ont été écartées afin d’éliminer les prix extrêmes non représentatifs qui faussaient la variance.
+
+    \item \textbf{Transformation logarithmique} :  
+    La distribution des prix étant fortement asymétrique, une nouvelle variable \texttt{log\_price} a été créée via la fonction \texttt{np.log1p}, correspondant au logarithme népérien de \(1 + x\). Cette transformation permet de rapprocher la distribution d'une loi Normale.
+
+    \item \textbf{Segmentation des hôtes} :  
+    La variable \texttt{host\_type} a été encodée selon le volume d'annonces gérées :
     \begin{itemize}
-        \item \textit{Occasionnel} : 1 annonce.
-        \item \textit{Multi-propriétaire} : 2 à 5 annonces.
-        \item \textit{Professionnel} : Plus de 5 annonces.
+        \item \textit{Occasionnel (0)} : 1 seule annonce.
+        \item \textit{Multi-propriétaire (1)} : de 2 à 5 annonces.
+        \item \textit{Opérateur (2)} : plus de 5 annonces.
     \end{itemize}
 \end{itemize}
+
 
 \subsection{Analyse Descriptive : La Fracture du Marché}
 L'analyse univariée et bivariée met en évidence une polarisation géographique et économique.
@@ -110,9 +124,24 @@ Comme illustré par la Figure 1, Manhattan affiche des médianes nettement supé
 
 \begin{figure}[H]
     \centering
-    % REMPLACEZ PAR VOTRE IMAGE : Slide 3 (Pie Chart et Bar chart disponibilité)
-    \includegraphics[width=0.95\textwidth]{structure_offre.png}
-    \caption{Le paradoxe de l'offre : Les occasionnels sont nombreux mais louent peu souvent, contrairement aux Pros.}
+    % Première image (gauche) : Le camembert
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        % Remplace 'pie_chart.png' par le nom de ton image camembert
+        \includegraphics[width=\textwidth]{structure_annonce.png} 
+        \caption{Répartition des annonces}
+    \end{subfigure}
+    \hfill % Espace élastique entre les deux
+    % Deuxième image (droite) : Le diagramme en barres
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        % Remplace 'bar_chart.png' par le nom de ton image disponibilité
+        \includegraphics[width=\textwidth]{dispo_moyenne.png}
+        \caption{Disponibilité moyenne (jours/an)}
+    \end{subfigure}
+    
+    \caption{Le paradoxe de l'offre : Les occasionnels sont majoritaires en volume (a), mais les Professionnels dominent la disponibilité temporelle (b).}
+    \label{fig:structure_offre}
 \end{figure}
 
 \subsection{Validation Statistique}
@@ -126,7 +155,11 @@ Le test de Kruskal-Wallis confirme que les différences de prix et de disponibil
 Afin de comprendre les structures latentes du marché sans a priori, nous avons déployé des méthodes d'analyse de données multivariées.
 
 \subsection{Analyse en Composantes Principales (ACP)}
-L'ACP a été appliquée sur les variables quantitatives décrivant l'activité (\texttt{price}, \texttt{minimum\_nights}, \texttt{availability\_365}, etc.). L'analyse révèle deux dimensions principales expliquant plus de 50\% de l'inertie.
+L'ACP a été appliquée sur les variables quantitatives décrivant l'activité (\texttt{price}, \texttt{minimum\_nights}, \texttt{availability\_365}, etc.). Les variables ont été préalablement centrées et réduites.
+
+\paragraph{Justification de la réduction dimensionnelle :}
+L'analyse de la variance expliquée indique que les deux premières composantes principales capturent environ \textbf{51,5\,\% de l'inertie totale}. Bien que ce chiffre puisse paraître modéré, il est important de noter que les \textbf{quatre premières composantes cumulent plus de 80\,\% de l'information}, ce qui valide la robustesse statistique de la réduction de dimension.
+Par souci de lisibilité et pour identifier les grandes tendances du marché (Business vs Partage), nous concentrerons notre interprétation sur le premier plan factoriel qui porte l'essentiel de la structure comportementale.
 
 \begin{figure}[H]
     \centering
@@ -135,12 +168,13 @@ L'ACP a été appliquée sur les variables quantitatives décrivant l'activité 
     \caption{Le cercle des corrélations met en évidence deux axes : l'intensité commerciale (horizontal) et la structure d'offre (vertical).}
 \end{figure}
 
+L'interprétation économique des axes est la suivante :
 \begin{itemize}
-    \item \textbf{Axe 1 (28.2\% variance) - L'Intensité Commerciale :} Oppose les logements à forte rotation (beaucoup d'avis) aux logements "dormants".
-    \item \textbf{Axe 2 (23.3\% variance) - La Barrière à l'Entrée :} Distingue l'activité professionnelle (disponible toute l'année, gestion de parc) de l'activité ponctuelle.
+    \item \textbf{Axe 1 (28.2\,\% variance) - L'Intensité Commerciale :} Oppose les logements à forte rotation (beaucoup d'avis et d'interactions) aux logements "dormants" ou peu attractifs.
+    \item \textbf{Axe 2 (23.3\,\% variance) - La Barrière à l'Entrée :} Distingue l'activité professionnelle (disponibilité toute l'année, gestion de parc immobilier, séjours longs) de l'activité ponctuelle et résidentielle.
 \end{itemize}
 
-La projection des individus (Figure 4) montre une déconnexion nette : les professionnels se regroupent dans le quadrant "Haute Disponibilité", tandis que les occasionnels sont dispersés.
+La projection des individus (Figure 4) montre une déconnexion nette : les professionnels se regroupent dans le quadrant "Haute Disponibilité", tandis que les occasionnels sont dispersés, confirmant la pertinence de ces axes pour la segmentation.
 
 \begin{figure}[H]
     \centering
@@ -159,6 +193,8 @@ L'analyse révèle une corrélation forte sur le premier axe, interprétable com
     \includegraphics[width=0.7\textwidth]{biplot_cca.png}
     \caption{La CCA illustre deux stratégies gagnantes : l'usine à touristes (axe horizontal) et l'empire immobilier (axe vertical).}
 \end{figure}
+
+Les analyses factorielles (ACP et CCA) nous ont permis d'identifier les grandes dimensions structurantes du marché (Intensité commerciale, Structure de l'offre). Il s'agit désormais d'utiliser ces dimensions pour regrouper les annonces similaires et identifier les profils types d'acteurs qui opèrent sur la plateforme.
 
 % ====================================================================
 % 4. SEGMENTATION COMPORTEMENTALE ET STRUCTURE DU MARCHÉ
@@ -304,13 +340,8 @@ On observe une ségrégation spatiale marquée :
     \item le marché Airbnb reproduit et accentue la géographie sociale et immobilière de New York.
 \end{itemize}
 
-\subsection{Synthèse}
+La segmentation a révélé que le Cluster 1 (Business) est fortement corrélé à Manhattan. Pour confirmer cette observation et dépasser le simple découpage administratif par arrondissement, il est nécessaire d'analyser la densité réelle des annonces via une approche spatiale continue (DBSCAN). 
 
-La segmentation comportementale met en évidence une dualité structurelle du marché Airbnb new-yorkais.  
-D’un côté, un pôle para-hôtelier professionnel, fortement concentré spatialement et fondé sur la privatisation du logement.  
-De l’autre, un pôle de partage résidentiel, marginalisé géographiquement mais fidèle à la philosophie initiale de la plateforme.  
-Les clusters intermédiaires jouent un rôle de transition et illustrent la transformation progressive du marché.
-```
 
 
 % ====================================================================
@@ -355,7 +386,7 @@ Cette analyse spatiale confirme que la professionnalisation d'Airbnb agit comme 
 % ====================================================================
 \section{Conclusion Générale}
 
-Au terme de cette analyse, la réponse à notre problématique est claire : le marché Airbnb new-yorkais est devenu **hybride et dual**.
+Au terme de cette analyse, la réponse à notre problématique est claire : le marché Airbnb new-yorkais est devenu "hybride et dual".
 
 D'un côté, le centre fonctionne selon une logique industrielle (disponibilité permanente, gestion professionnelle, prix élevés). De l'autre, la périphérie maintient une logique de partage authentique. La plateforme a absorbé la logique hôtelière en son centre tout en créant un marché social complémentaire en périphérie. Cette étude démontre que loin d'uniformiser le territoire, Airbnb révèle et exploite les fractures économiques de la métropole.
 
